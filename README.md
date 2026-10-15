@@ -19,8 +19,8 @@ Django 5.2, Django REST Framework, SimpleJWT, django-cors-headers, python-dotenv
 Desde la raíz del proyecto:
 
 ```powershell
-py -3.11 -m venv venv
-.\venv\Scripts\Activate.ps1
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
@@ -71,7 +71,7 @@ Los endpoints del catálogo requieren `Authorization: Bearer <access>`; sin JWT 
 
 El registro usa `create_user` para almacenar contraseñas hasheadas. El serializer marca ambas contraseñas como `write_only`; no aparecen en respuestas.
 
-## Despliegue en Render
+## Despliegue en Render (opcional)
 
 1. Sube este repositorio a GitHub y crea un servicio **Web Service** en Render conectado al repositorio.
 2. Selecciona **Runtime: Python**. Usa `./build.sh` como **Build Command**.
@@ -90,7 +90,7 @@ El registro usa `create_user` para almacenar contraseñas hasheadas. El serializ
 
 El build instala dependencias y recopila estáticos; el arranque aplica migraciones y carga el menú de forma idempotente. En producción Render debe proveer una base de datos persistente por `DATABASE_URL`; los discos locales efímeros no son apropiados para SQLite con datos duraderos.
 
-**URL desplegada:** pendiente de despliegue: `[URL DEL HOSTING]`.
+**Ejecución:** el proyecto se ejecuta en local (ver «Instalación local»). Abrir http://127.0.0.1:8000/ después de `python manage.py runserver`.
 
 ## Rúbrica vs. implementación
 
