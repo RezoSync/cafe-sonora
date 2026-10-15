@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Nuestro menú | Café Sonora{% endblock %}
+{% block content %}
+<section class="menu-hero">
+  <p class="eyebrow">HECHO CON CALMA, PARA DISFRUTAR SIN PRISA</p>
+  <h1>Un menú con sabor<br>a casa y a desierto.</h1>
+  <p>Elige algo rico para acompañar tu momento.</p>
+</section>
+<section class="menu-section">
+  <div class="menu-toolbar">
+    <div id="category-filters" class="category-filters" aria-label="Filtrar por categoría">
+      <button type="button" class="filter-chip is-active" data-category="">Todo</button>
+    </div>
+    <label class="search-box"><span aria-hidden="true">⌕</span><span class="sr-only">Buscar en el menú</span><input id="product-search" type="search" placeholder="Buscar algo rico…" autocomplete="off"></label>
+  </div>
+  <p id="menu-status" class="menu-status" role="status" aria-live="polite">Cargando el menú…</p>
+  <div id="product-grid" class="product-grid"></div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/menu.js' %}" defer></script>{% endblock %}

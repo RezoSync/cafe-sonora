@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Crear cuenta | Café Sonora{% endblock %}
+{% block content %}
+<section class="auth-section">
+  <div class="auth-aside">
+    <p class="eyebrow">QUÉ GUSTO TENERTE AQUÍ</p>
+    <h1>Siempre hay<br>lugar en la mesa.</h1>
+    <p>Crea tu cuenta y ven a disfrutar un pedacito de Sonora, cuando quieras.</p>
+    <span class="auth-decoration" aria-hidden="true">☕</span>
+  </div>
+  <div class="auth-card">
+    <p class="eyebrow">EMPIEZA POR AQUÍ</p>
+    <h2>Crear cuenta</h2>
+    <p class="form-intro">Completa tus datos para descubrir el menú.</p>
+    <form id="register-form" novalidate>
+      <label for="username">Nombre de usuario</label>
+      <input id="username" name="username" type="text" autocomplete="username" required maxlength="150">
+      <label for="email">Correo electrónico</label>
+      <input id="email" name="email" type="email" autocomplete="email" required>
+      <label for="password">Contraseña</label>
+      <input id="password" name="password" type="password" autocomplete="new-password" required aria-describedby="password-hint">
+      <small id="password-hint" class="field-hint">Mínimo 8 caracteres, una mayúscula, un número y un símbolo.</small>
+      <label for="password-confirm">Confirmar contraseña</label>
+      <input id="password-confirm" name="password_confirm" type="password" autocomplete="new-password" required>
+      <p id="register-message" class="form-message" role="status" aria-live="polite"></p>
+      <button class="button button-primary button-full" type="submit">Crear mi cuenta <span aria-hidden="true">→</span></button>
+    </form>
+    <p class="auth-switch">¿Ya tienes cuenta? <a href="/login/">Inicia sesión</a></p>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/auth.js' %}" defer></script>{% endblock %}

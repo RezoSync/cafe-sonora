@@ -1,0 +1,58 @@
+{% load static %}
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbf4e9">
+  <meta name="description" content="Café Sonora: café, pan recién hecho y calma del desierto en San Luis Río Colorado.">
+  <title>{% block title %}Café Sonora | Un respiro del desierto{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav-shell" aria-label="Navegación principal">
+      <a class="brand" href="/" aria-label="Café Sonora, inicio">
+        <span class="brand-mark" aria-hidden="true">☀</span>
+        <span>Café <strong>Sonora</strong></span>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+      <div class="nav-links">
+        <a href="/#historia">Nuestra esencia</a>
+        <a href="/#visitanos">Visítanos</a>
+        <a href="/menu/" class="nav-menu-link">El menú</a>
+        <a href="/login/" class="nav-login-link">Iniciar sesión</a>
+        <button class="button button-small button-outline nav-logout" type="button" hidden>Cerrar sesión</button>
+      </div>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="footer-main">
+      <div>
+        <a class="brand brand-footer" href="/"><span class="brand-mark" aria-hidden="true">☀</span><span>Café <strong>Sonora</strong></span></a>
+        <p>Un rincón cálido para bajar el ritmo y saborear el desierto.</p>
+      </div>
+      <div>
+        <h2>Encuéntranos</h2>
+        <p>Av. Madero 120, San Luis Río Colorado, Sonora</p>
+        <p>Todos los días · 7:00 a. m. – 8:00 p. m.</p>
+      </div>
+      <div>
+        <h2>Hecho con calma</h2>
+        <p>Café de origen, pan recién horneado y hospitalidad sonorense.</p>
+        <a href="/#visitanos">Conoce la sucursal →</a>
+      </div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 Café Sonora · Proyecto escolar de demostración</span><span>☀ San Luis Río Colorado, Sonora</span></div>
+  </footer>
+  <script src="{% static 'js/site.js' %}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

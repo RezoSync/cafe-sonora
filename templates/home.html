@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<section class="hero">
+  <div class="hero-content">
+    <p class="eyebrow">CAFÉ DE DESIERTO · SAN LUIS RÍO COLORADO</p>
+    <h1>Un respiro cálido<br>en medio del desierto.</h1>
+    <p class="hero-copy">Aromas que abrazan, sabores de casa y un lugar para hacer una pausa. El desierto también sabe a café.</p>
+    <div class="hero-actions">
+      <a class="button button-light" href="/registro/">Únete a la mesa <span aria-hidden="true">→</span></a>
+      <a class="button button-ghost" href="/menu/">Descubre el menú</a>
+    </div>
+    <div class="hero-note"><span aria-hidden="true">✳</span> Preparado con cariño, servido sin prisa.</div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="sun-disc"></div>
+    <div class="desert-ridge ridge-back"></div>
+    <div class="desert-ridge ridge-front"></div>
+    <div class="coffee-cup"><span>☕</span></div>
+    <span class="art-sparkle sparkle-one">✳</span><span class="art-sparkle sparkle-two">✦</span>
+  </div>
+</section>
+
+<section class="weather-section" aria-labelledby="weather-title">
+  <div class="weather-card">
+    <div class="weather-icon" aria-hidden="true">🌤️</div>
+    <div class="weather-copy">
+      <p class="eyebrow">EL TIEMPO EN SAN LUIS</p>
+      <h2 id="weather-title">Un sorbo según el clima</h2>
+      <p id="weather-status" role="status" aria-live="polite">Consultando el clima de hoy…</p>
+    </div>
+    <div class="weather-result">
+      <span id="weather-temperature" class="weather-temperature">--°</span>
+      <span id="weather-recommendation">Muy pronto, una recomendación de la casa.</span>
+    </div>
+  </div>
+</section>
+
+<section id="historia" class="story-section section-pad">
+  <div class="story-copy">
+    <p class="eyebrow">UN POQUITO DE SONORA EN CADA TAZA</p>
+    <h2>El calor del hogar,<br>con alma de desierto.</h2>
+    <p>En Café Sonora celebramos los ingredientes sencillos y los encuentros que se alargan. Servimos café con carácter, pan recién horneado y un espacio amable para compartir.</p>
+    <a class="text-link" href="/menu/">Mira lo que preparamos <span aria-hidden="true">→</span></a>
+  </div>
+  <div class="story-stamp" aria-label="Tostado con calma, servido con cariño">
+    <span class="stamp-sun" aria-hidden="true">☀</span>
+    <span>TOSTADO CON CALMA</span>
+    <strong>SERVIDO<br>CON CARIÑO</strong>
+    <span class="stamp-stars" aria-hidden="true">✳ · ✳ · ✳</span>
+  </div>
+</section>
+
+<section id="visitanos" class="location-section section-pad">
+  <div class="location-heading">
+    <p class="eyebrow">AQUÍ TE ESPERAMOS</p>
+    <h2>Nuestra casa en el desierto.</h2>
+  </div>
+  <div class="location-card">
+    <div class="location-symbol" aria-hidden="true">📍</div>
+    <div>
+      <h3>Café Sonora - San Luis Río Colorado, Sonora</h3>
+      <p>Av. Madero 120, colonia Comercial<br>San Luis Río Colorado, Sonora, México</p>
+      <p><strong>Horario:</strong> Lunes a domingo, 7:00 a. m. – 8:00 p. m.</p>
+    </div>
+    <a class="button button-primary" href="/registro/">Pasa por un café</a>
+  </div>
+</section>
+
+<section class="join-banner">
+  <div><p class="eyebrow">TU MESA YA ESTÁ LISTA</p><h2>Lo bueno se disfruta<br>mejor sin prisa.</h2></div>
+  <a class="button button-light" href="/registro/">Crear mi cuenta <span aria-hidden="true">→</span></a>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/home.js' %}" defer></script>{% endblock %}
