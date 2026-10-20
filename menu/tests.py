@@ -23,9 +23,11 @@ class ProtectedMenuTests(TestCase):
         user = get_user_model().objects.create_user(
             username="menu_guest", password="SonoraCafe!24"
         )
+        user.email = "menu@example.com"
+        user.save(update_fields=["email"])
         token_response = self.client.post(
             "/api/auth/login/",
-            {"username": user.username, "password": "SonoraCafe!24"},
+            {"email": user.email, "password": "SonoraCafe!24"},
             format="json",
         )
         self.assertEqual(token_response.status_code, 200)

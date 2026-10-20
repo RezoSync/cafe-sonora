@@ -12,7 +12,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("username", "email", "password", "password_confirm")
+        fields = ("username", "email", "telefono", "password", "password_confirm")
 
     def validate_username(self, value):
         if User.objects.filter(username__iexact=value).exists():
@@ -45,7 +45,11 @@ class RegisterSerializer(serializers.ModelSerializer):
                     )
                 }
             )
-        candidate = User(username=attrs["username"], email=attrs["email"])
+        candidate = User(
+            username=attrs["username"],
+            email=attrs["email"],
+            telefono=attrs.get("telefono", ""),
+        )
         validate_password(password, user=candidate)
         return attrs
 
@@ -55,8 +59,75 @@ class RegisterSerializer(serializers.ModelSerializer):
         return User.objects.create_user(password=password, **validated_data)
 
 
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=False,
+        trim_whitespace=False,
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "telefono",
+            "is_staff",
+            "is_superuser",
+            "is_active",
+            "date_joined",
+            "password",
+        )
+        read_only_fields = ("id", "date_joined")
+        extra_kwargs = {"password": {"write_only": True}}
+
+    def validate_email(self, value):
+        value = value.strip().lower()
+        users = User.objects.filter(email__iexact=value)
+        if self.instance is not None:
+            users = users.exclude(pk=self.instance.pk)
+        if users.exists():
+            raise serializers.ValidationError("Este correo ya está registrado.")
+        return value
+
+    def validate(self, attrs):
+        password = attrs.get("password")
+        if self.instance is None and not password:
+            raise serializers.ValidationError(
+                {"password": "Este campo es obligatorio al crear un usuario."}
+            )
+        if password:
+            if self.instance is None:
+                candidate = User(
+                    username=attrs.get("username", ""),
+                    email=attrs.get("email", ""),
+                    telefono=attrs.get("telefono", ""),
+                )
+            else:
+                candidate = self.instance
+            validate_password(password, user=candidate)
+        return attrs
+
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+        return User.objects.create_user(password=password, **validated_data)
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop("password", None)
+        for attribute, value in validated_data.items():
+            setattr(instance, attribute, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
+
 class CafeTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
+        attrs[self.username_field] = attrs[self.username_field].strip().lower()
         data = super().validate(attrs)
-        data["username"] = self.user.get_username()
+        data["username"] = self.user.username
         return data

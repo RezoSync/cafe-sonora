@@ -28,13 +28,20 @@ Copy-Item .env.example .env
 Edita `.env` para desarrollo: configura `SECRET_KEY` con una clave aleatoria propia y cambia `DEBUG=True`. Luego:
 
 ```powershell
+# Solo al migrar desde la base anterior de esta práctica; borra sus datos locales.
+if (Test-Path .\db.sqlite3) { Remove-Item .\db.sqlite3 }
+python manage.py makemigrations accounts
+python manage.py makemigrations
 python manage.py migrate
 python manage.py seed_menu
 python manage.py createsuperuser
+python manage.py collectstatic --noinput
 python manage.py runserver
 ```
 
 Abre `http://127.0.0.1:8000/`. La cuenta de superusuario se define interactivamente; no se incluye ninguna credencial de prueba.
+Para esta práctica, si vienes de la base de datos anterior, elimina `db.sqlite3` antes de generar las migraciones y migrar.
+La documentación queda disponible en `/swagger/` y `/redoc/`; el panel administrativo está en `/admin/`.
 
 ## Variables de entorno
 
@@ -61,15 +68,18 @@ Los endpoints del catálogo requieren `Authorization: Bearer <access>`; sin JWT 
 
 | Método | Endpoint | Acceso |
 |---|---|---|
-| `POST` | `/api/auth/register/` | Público; recibe `username`, `email`, `password`, `password_confirm`. |
-| `POST` | `/api/auth/login/` | Público; recibe usuario/contraseña y devuelve access + refresh. |
+| `POST` | `/api/auth/register/` | Público; recibe `username`, `email`, `telefono` opcional, `password`, `password_confirm`. |
+| `POST` | `/api/auth/login/` | Público; recibe `email` y `password`, y devuelve access + refresh. |
 | `POST` | `/api/auth/refresh/` | Público; recibe `refresh` y devuelve access (y refresh rotado). |
+| `GET` | `/api/auth/me/` | JWT; devuelve los datos del usuario autenticado, sin contraseña. |
+| `GET/POST` | `/api/users/` | Solo administradores; lista/crea usuarios. |
+| `GET/PUT/PATCH/DELETE` | `/api/users/<id>/` | Solo administradores; administra un usuario. |
 | `GET` | `/api/categories/` | JWT; lista categorías. |
 | `GET` | `/api/products/` | JWT; lista productos disponibles. |
 | `GET` | `/api/products/<id>/` | JWT; detalle de producto. |
 | `GET` | `/api/products/?category=cafes-calientes&search=latte` | JWT; filtros opcionales por slug y texto. |
 
-El registro usa `create_user` para almacenar contraseñas hasheadas. El serializer marca ambas contraseñas como `write_only`; no aparecen en respuestas.
+El registro acepta `telefono` opcional y usa `create_user` para almacenar contraseñas hasheadas. La contraseña es de solo escritura y no aparece en respuestas, incluyendo `/api/auth/me/` y la administración de usuarios. PATCH sin contraseña conserva la clave actual.
 
 ## Despliegue en Render (opcional)
 

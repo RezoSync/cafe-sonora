@@ -22,6 +22,7 @@
     const message = document.getElementById("register-message");
     const username = registerForm.elements.username.value.trim();
     const email = registerForm.elements.email.value.trim();
+    const telefono = registerForm.elements.telefono.value.trim();
     const password = registerForm.elements.password.value;
     const confirmation = registerForm.elements.password_confirm.value;
     if (!username || !email || !password || !confirmation) return showMessage(message, "Completa todos los campos.");
@@ -36,7 +37,7 @@
       const response = await fetch(`${API}register/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, password_confirm: confirmation }),
+        body: JSON.stringify({ username, email, telefono, password, password_confirm: confirmation }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(getErrorMessage(payload) || "No fue posible crear la cuenta.");
@@ -53,9 +54,9 @@
   loginForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const message = document.getElementById("login-message");
-    const username = loginForm.elements.username.value.trim();
+    const email = loginForm.elements.email.value.trim();
     const password = loginForm.elements.password.value;
-    if (!username || !password) return showMessage(message, "Escribe tu usuario y contraseña.");
+    if (!email || !password) return showMessage(message, "Escribe tu correo y contraseña.");
     const button = loginForm.querySelector("button[type=submit]");
     button.disabled = true;
     showMessage(message, "Validando tus datos…", false);
@@ -63,7 +64,7 @@
       const response = await fetch(`${API}login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(getErrorMessage(payload) || "Usuario o contraseña incorrectos.");
