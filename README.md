@@ -1,128 +1,129 @@
 # Café Sonora
 
-Proyecto escolar de demostración: una cafetería ficticia de desierto en San Luis Río Colorado. Incluye sitio responsive, registro y autenticación JWT, catálogo desde API REST y clima actual de Open-Meteo. No representa una marca comercial.
+Aplicación escolar para una cafetería ficticia de San Luis Río Colorado. El proyecto conserva el sitio y las plantillas HTML de Django existentes y agrega un frontend React con Vite que consume la API REST protegida con JWT. Incluye registro, inicio de sesión, consulta del clima con Open-Meteo y un servicio SOAP de países.
 
-## Pantallas y funciones
+## Estructura
 
-- **Inicio** (`/`): hero, esencia de la cafetería, sucursal/horario de ejemplo, accesos de registro y login y widget del clima.
-- **Registro** (`/registro/`): validación en navegador y API, correo/nombre únicos, validación de contraseña Django y hash seguro.
-- **Login** (`/login/`): recibe JWT access/refresh y los conserva para la sesión de demostración.
-- **Menú protegido** (`/menu/`): productos desde la API, categorías, búsqueda, renovación de access con refresh y logout.
-- **Admin** (`/admin/`): gestión de productos y categorías.
+- `accounts/`: usuario personalizado, registro, autenticación JWT, perfil y endpoint SOAP.
+- `menu/`: API y administración de categorías y productos existentes.
+- `cafe_sonora/`: configuración y rutas del proyecto Django.
+- `templates/`, `static/`: sitio HTML existente de Django, conservado.
+- `frontend/`: aplicación React + Vite en JavaScript.
+  - `src/api/`: solicitudes a la API Django y manejo del token.
+  - `src/context/`, `src/hooks/`: estado y hooks de autenticación.
+  - `src/routes/`, `src/layouts/`: navegación y layouts.
+  - `src/pages/`: páginas de administración, cliente y acceso común.
+  - `src/components/`: widgets de clima y consulta SOAP.
 
 ## Tecnologías
 
-Django 5.2, Django REST Framework, SimpleJWT, django-cors-headers, python-dotenv, WhiteNoise, Gunicorn, dj-database-url, SQLite local, HTML/CSS/JavaScript y Open-Meteo.
+- Backend: Django, Django REST Framework, SimpleJWT, CORS Headers y Zeep.
+- Frontend: React, Vite, Semantic UI React, Sass, React Router, Formik, Yup y React Toastify.
+- API externa de clima: Open-Meteo, sin API key.
+- Servicio SOAP externo: CountryInfoService de Oorsprong.
 
-## Instalación local (Windows PowerShell)
+## Instalación del backend
 
-Desde la raíz del proyecto:
+Desde la raíz del repositorio, en Windows PowerShell:
 
 ```powershell
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
-Edita `.env` para desarrollo: configura `SECRET_KEY` con una clave aleatoria propia y cambia `DEBUG=True`. Luego:
+Configura `SECRET_KEY` en `.env` con una clave local privada. Para desarrollo local usa `DEBUG=True`; en producción debe ser `False`. El `.env` local no se versiona.
 
 ```powershell
-# Solo al migrar desde la base anterior de esta práctica; borra sus datos locales.
-if (Test-Path .\db.sqlite3) { Remove-Item .\db.sqlite3 }
-python manage.py makemigrations accounts
-python manage.py makemigrations
 python manage.py migrate
-python manage.py seed_menu
-python manage.py createsuperuser
-python manage.py collectstatic --noinput
-python manage.py runserver
+python manage.py runserver 8000
 ```
 
-Abre `http://127.0.0.1:8000/`. La cuenta de superusuario se define interactivamente; no se incluye ninguna credencial de prueba.
-Para esta práctica, si vienes de la base de datos anterior, elimina `db.sqlite3` antes de generar las migraciones y migrar.
-La documentación queda disponible en `/swagger/` y `/redoc/`; el panel administrativo está en `/admin/`.
+El backend queda disponible en `http://localhost:8000`. Las plantillas Django existentes siguen disponibles, por ejemplo, en `/`, `/registro/` y `/login/`.
 
-## Variables de entorno
+## Instalación del frontend
 
-`.env.example` contiene el inventario de variables sin secretos:
-
-| Variable | Uso |
-|---|---|
-| `SECRET_KEY` | Clave secreta Django. Obligatoria en despliegue; usar valor fuerte y exclusivo. |
-| `DEBUG` | `True` solo en desarrollo local; `False` en producción. |
-| `ALLOWED_HOSTS` | Hosts permitidos separados por comas. |
-| `CORS_ALLOWED_ORIGINS` | Orígenes CORS exactos, separados por comas; no usar comodines. |
-| `CSRF_TRUSTED_ORIGINS` | Orígenes HTTPS/HTTP confiables para CSRF, separados por comas. |
-| `DATABASE_URL` | URL de base de datos de producción. Vacía usa SQLite local. |
-| `ACCESS_TOKEN_LIFETIME_MINUTES` | Duración del access token (predeterminado: 15 minutos). |
-| `REFRESH_TOKEN_LIFETIME_DAYS` | Duración del refresh token (predeterminado: 1 día). |
-| `API_THROTTLE_LOGIN` | Límite para login (predeterminado: `5/minute`). |
-| `API_THROTTLE_REGISTER` | Límite para registro (predeterminado: `3/hour`). |
-
-Open-Meteo no necesita API key.
-
-## API REST
-
-Los endpoints del catálogo requieren `Authorization: Bearer <access>`; sin JWT responden `401`.
-
-| Método | Endpoint | Acceso |
-|---|---|---|
-| `POST` | `/api/auth/register/` | Público; recibe `username`, `email`, `telefono` opcional, `password`, `password_confirm`. |
-| `POST` | `/api/auth/login/` | Público; recibe `email` y `password`, y devuelve access + refresh. |
-| `POST` | `/api/auth/refresh/` | Público; recibe `refresh` y devuelve access (y refresh rotado). |
-| `GET` | `/api/auth/me/` | JWT; devuelve los datos del usuario autenticado, sin contraseña. |
-| `GET/POST` | `/api/users/` | Solo administradores; lista/crea usuarios. |
-| `GET/PUT/PATCH/DELETE` | `/api/users/<id>/` | Solo administradores; administra un usuario. |
-| `GET` | `/api/categories/` | JWT; lista categorías. |
-| `GET` | `/api/products/` | JWT; lista productos disponibles. |
-| `GET` | `/api/products/<id>/` | JWT; detalle de producto. |
-| `GET` | `/api/products/?category=cafes-calientes&search=latte` | JWT; filtros opcionales por slug y texto. |
-
-El registro acepta `telefono` opcional y usa `create_user` para almacenar contraseñas hasheadas. La contraseña es de solo escritura y no aparece en respuestas, incluyendo `/api/auth/me/` y la administración de usuarios. PATCH sin contraseña conserva la clave actual.
-
-## Despliegue en Render (opcional)
-
-1. Sube este repositorio a GitHub y crea un servicio **Web Service** en Render conectado al repositorio.
-2. Selecciona **Runtime: Python**. Usa `./build.sh` como **Build Command**.
-3. Usa `gunicorn cafe_sonora.wsgi:application` como **Start Command**.
-4. En Render configura estas variables:
-   - `SECRET_KEY`: clave criptográficamente aleatoria y privada.
-   - `DEBUG`: `False`.
-   - `ALLOWED_HOSTS`: dominio asignado de Render, por ejemplo `cafe-sonora.onrender.com` (sin esquema).
-   - `CORS_ALLOWED_ORIGINS`: origen HTTPS del dominio Render, por ejemplo `https://cafe-sonora.onrender.com`.
-   - `CSRF_TRUSTED_ORIGINS`: `https://` más el dominio Render.
-   - `DATABASE_URL`: URL interna de una base PostgreSQL de Render; omítela únicamente para una demo SQLite no persistente.
-   - `ACCESS_TOKEN_LIFETIME_MINUTES`: `15`; `REFRESH_TOKEN_LIFETIME_DAYS`: `1`.
-   - `API_THROTTLE_LOGIN`: `5/minute`; `API_THROTTLE_REGISTER`: `3/hour`.
-5. Start Command: `python manage.py migrate --noinput && python manage.py seed_menu && gunicorn cafe_sonora.wsgi:application`. Crea el usuario administrador con una Shell de Render: `python manage.py createsuperuser`.
-6. Verifica `/`, registro, login, `/menu/` y `https://<dominio>/api/products/` sin token (debe ser `401`).
-
-El build instala dependencias y recopila estáticos; el arranque aplica migraciones y carga el menú de forma idempotente. En producción Render debe proveer una base de datos persistente por `DATABASE_URL`; los discos locales efímeros no son apropiados para SQLite con datos duraderos.
-
-**Ejecución:** el proyecto se ejecuta en local (ver «Instalación local»). Abrir http://127.0.0.1:8000/ después de `python manage.py runserver`.
-
-## Rúbrica vs. implementación
-
-| Requisito | Implementación |
-|---|---|
-| Apps independientes y estructura limpia | `accounts/`, `menu/`, `cafe_sonora/`, `templates/`, `static/` |
-| Identidad, paleta, fuentes, responsive, navbar fija, tarjetas y footer | `static/css/site.css`, `templates/base.html` |
-| Inicio, sucursal, horario y enlaces de cuenta | `templates/home.html` |
-| Open-Meteo, carga, errores y recomendación por temperatura | `static/js/home.js` |
-| Registro con validación cliente/servidor y unicidad | `static/js/auth.js`, `accounts/serializers.py`, `accounts/tests.py` |
-| Login JWT, refresh, menú protegido y logout | `accounts/views.py`, `static/js/auth.js`, `static/js/menu.js`, `templates/menu.html` |
-| Categorías/productos, serializers, filtros, endpoints y permisos | `menu/models.py`, `menu/serializers.py`, `menu/views.py`, `menu/urls.py`, `menu/tests.py` |
-| Semilla de 16 productos y administración | `menu/management/commands/seed_menu.py`, `menu/admin.py` |
-| Variables de entorno, CORS, CSRF, throttling y cabeceras de producción | `.env.example`, `cafe_sonora/settings.py`, `accounts/views.py` |
-| Render, Gunicorn, WhiteNoise y base por URL | `requirements.txt`, `build.sh`, `cafe_sonora/settings.py` |
-| Pruebas automatizadas de registro, JWT y API protegida | `accounts/tests.py`, `menu/tests.py` |
-
-## Comprobaciones
+Desde la raíz:
 
 ```powershell
-python manage.py check
-python manage.py test accounts menu
+cd frontend
+npm install
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+npm run dev
 ```
 
-El proyecto incluye pruebas automatizadas de registro, contraseñas hasheadas, autenticación JWT, catálogo protegido, categorías, filtros y la respuesta `401` del menú sin token.
+El frontend queda disponible en `http://localhost:5173`. Su `.env` define:
+
+```dotenv
+VITE_BASE_API_URL=http://localhost:8000
+VITE_LOCAL_STORAGE_ITEM_NAME=TOKEN
+```
+
+## Puertos de desarrollo
+
+| Servicio | Puerto | URL |
+|---|---:|---|
+| Django | 8000 | `http://localhost:8000` |
+| Vite/React | 5173 | `http://localhost:5173` |
+
+El `.env.example` de Django permite desarrollo local y conserva los orígenes anteriores de CORS junto con `http://localhost:5173` y `http://127.0.0.1:5173`.
+
+## Endpoints utilizados
+
+| Método | Endpoint | Acceso | Uso |
+|---|---|---|---|
+| `POST` | `/api/auth/register/` | Público | Registro con `username`, `email`, `telefono`, `password` y `password_confirm`. |
+| `POST` | `/api/auth/login/` | Público | Recibe `email` y `password`; devuelve `access` y `refresh`. |
+| `POST` | `/api/auth/refresh/` | Público | Renueva el access token mediante el refresh token. |
+| `GET` | `/api/auth/me/` | JWT | Devuelve el usuario actual, sin contraseña. Es el web service propio; sin Bearer token responde `401`. |
+| `GET` | `/api/soap/country/?code=MX` | JWT | Consulta código, nombre y capital mediante SOAP. |
+
+El inicio de sesión tiene límite de 5 intentos por minuto y el registro de 3 por hora. La interfaz muestra un aviso claro al recibir `429`. La API de menú y las rutas CRUD de usuarios del backend conservan sus permisos existentes.
+
+## API externa: Open-Meteo
+
+El dashboard solicita el clima actual de San Luis Río Colorado, Sonora, usando latitud `32.4565` y longitud `-114.7719`. Muestra temperatura, viento y la descripción en español del código meteorológico. No requiere API key. La tarjeta indica carga y errores de conexión o timeout.
+
+## Servicio SOAP: CountryInfoService
+
+El endpoint propio `GET /api/soap/country/?code=MX` requiere `Authorization: Bearer <access>`. Django usa Zeep y el WSDL público:
+
+`http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso?WSDL`
+
+Consulta las operaciones `CountryName(sCountryISOCode)` y `CapitalCity(sCountryISOCode)`, con timeout configurado. Devuelve JSON con `code`, `name` y `capital`; un código ISO inválido responde `400`, y errores o timeout del servicio remoto responden `502`. El widget SOAP del dashboard envía el access token y permite ingresar el código de país.
+
+## Cómo probar
+
+1. Inicia Django desde la raíz con `python manage.py runserver 8000`.
+2. En otra terminal, inicia Vite con `npm --prefix frontend run dev`.
+3. Abre `http://localhost:5173/register`, crea una cuenta y después inicia sesión en `/login`. La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un símbolo.
+4. En el dashboard verifica el saludo, el widget del clima, la consulta SOAP con `MX` y el botón **Cerrar Sesión**. Al recargar una sesión válida, el usuario se vuelve a consultar en `/api/auth/me/`.
+5. Comprueba que `/api/auth/me/` requiere autenticación:
+
+   ```powershell
+   curl.exe -i "http://localhost:8000/api/auth/me/"
+   ```
+
+   Sin token debe responder `401`.
+
+6. Para probar SOAP, sustituye `<ACCESS_TOKEN>` por el access token de la sesión:
+
+   ```powershell
+   curl.exe -H "Authorization: Bearer <ACCESS_TOKEN>" "http://localhost:8000/api/soap/country/?code=MX"
+   ```
+
+   La respuesta esperada es similar a:
+
+   ```json
+   {"code":"MX","name":"Mexico","capital":"Mexico City"}
+   ```
+
+## Validaciones
+
+```powershell
+.\.venv\Scripts\python.exe manage.py check
+.\.venv\Scripts\python.exe manage.py test accounts
+npm --prefix frontend run build
+npm --prefix frontend run lint
+```

@@ -1,6 +1,9 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient, APITestCase
+from zeep.exceptions import TransportError
 
 User = get_user_model()
 
@@ -199,3 +202,57 @@ class UserAPITests(APITestCase):
             User.objects.get(username="phone_guest").telefono,
             "+52 653 987 654",
         )
+
+
+class SoapCountryTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="soap_guest",
+            email="soap@example.com",
+            password="SonoraCafe!24",
+        )
+        self.client.force_authenticate(user=self.user)
+
+    def test_country_service_requires_authentication(self):
+        response = APIClient().get("/api/soap/country/?code=MX")
+        self.assertEqual(response.status_code, 401)
+
+    def test_country_service_rejects_malformed_iso_code(self):
+        response = self.client.get("/api/soap/country/?code=MEX")
+        self.assertEqual(response.status_code, 400)
+
+    @patch("accounts.soap_views.Client")
+    def test_country_service_returns_country_and_capital(self, soap_client):
+        service = soap_client.return_value.service
+        service.CountryName.return_value = "Mexico"
+        service.CapitalCity.return_value = "Mexico City"
+
+        response = self.client.get("/api/soap/country/?code=mx")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data,
+            {"code": "MX", "name": "Mexico", "capital": "Mexico City"},
+        )
+        soap_client.assert_called_once()
+        transport = soap_client.call_args.kwargs["transport"]
+        self.assertEqual(transport.load_timeout, 10)
+        self.assertEqual(transport.operation_timeout, 10)
+
+    @patch("accounts.soap_views.Client")
+    def test_country_service_rejects_unknown_iso_code(self, soap_client):
+        soap_client.return_value.service.CountryName.return_value = (
+            "Country not found in the database"
+        )
+
+        response = self.client.get("/api/soap/country/?code=ZZ")
+
+        self.assertEqual(response.status_code, 400)
+        soap_client.return_value.service.CapitalCity.assert_not_called()
+
+    @patch("accounts.soap_views.Client", side_effect=TransportError("unavailable"))
+    def test_country_service_returns_502_when_soap_is_unavailable(self, _soap_client):
+        with patch("accounts.soap_views.logger.exception"):
+            response = self.client.get("/api/soap/country/?code=MX")
+
+        self.assertEqual(response.status_code, 502)

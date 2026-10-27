@@ -1,0 +1,28 @@
+body {
+  background-color: #f7f3ed;
+}
+
+.login-page,
+.register-page {
+  max-width: 28rem;
+  margin: 3rem auto;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  background-color: #fff;
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 8%);
+}
+
+.login-page > .ui.header {
+  margin-bottom: 1.5rem;
+  color: #5b3325;
+}
+
+.register-page > .ui.header {
+  margin-bottom: 1.5rem;
+  color: #5b3325;
+}
+
+.login-page > .ui.message,
+.register-page > .ui.message {
+  margin-top: 1rem;
+}
